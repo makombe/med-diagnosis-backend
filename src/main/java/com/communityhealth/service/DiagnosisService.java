@@ -2,6 +2,8 @@
 package com.communityhealth.service;
 
 import com.communityhealth.diagnosis.DiagnosisProvider;
+import com.communityhealth.dto.DiagnosisRequestDto;
+import com.communityhealth.dto.DiagnosisResponseDto;
 import com.communityhealth.dto.ValidationRequest;
 import com.communityhealth.integration.ApiMedicClient;
 import com.communityhealth.model.Diagnosis;
@@ -26,31 +28,28 @@ public class DiagnosisService {
     }
 
     @Transactional
-    public List<Diagnosis> performDiagnosis(@Valid Diagnosis request) {
+    public List<DiagnosisResponseDto> performDiagnosis(@Valid DiagnosisRequestDto request) {
 
-        List<Map<String, Object>> apiResults =
+        var apiResults =
                 diagnosisProvider.diagnose(
                         request.getSymptoms(),
                         request.getPatient().getDateOfBirth(),
                         request.getPatient().getGender()
                 );
-
-        List<Diagnosis> results = new ArrayList<>();
-
-        for (Map<String, Object> result : apiResults) {
-            Diagnosis diagnosis = new Diagnosis();
-            diagnosis.setSymptoms(request.getSymptoms());
-
-            Map<String, Object> issue = (Map<String, Object>) result.get("Issue");
-            diagnosis.setDiagnosisName(issue.get("Name").toString());
-            diagnosis.setIcd(issue.get("ICD").toString());
-            diagnosis.setIcdName(issue.get("ICDName").toString());
-            diagnosis.setValidationStatus("PENDING");
-
-            results.add(repository.save(diagnosis));
+        if (apiResults.isEmpty()) {
+            return List.of();
         }
+        List<Diagnosis> entities = apiResults.stream()
+                .map(r -> mapToEntity(r, request.getSymptoms()))
+                .toList();
 
-        return results;
+        // One transaction - batch save
+        List<Diagnosis> saved = repository.saveAll(entities);
+
+        return saved.stream()
+                .map(this::toResponseDto)
+                .toList();
+
     }
 
     @Transactional
@@ -62,5 +61,41 @@ public class DiagnosisService {
 
     public List<Diagnosis> findAll() {
         return repository.findAll();
+    }
+
+    public DiagnosisResponseDto toResponseDto(Diagnosis entity) {
+        return new DiagnosisResponseDto(
+                entity.getId(),
+                entity.getDiagnosisName(),
+                entity.getIcd(),
+                entity.getIcdName(),
+                entity.getSymptoms(),
+                entity.getValidationStatus(),
+                entity.getCreatedAt()
+        );
+    }
+
+    private Diagnosis mapToEntity(Map<String, Object> apiResult, String symptoms) {
+        Diagnosis diagnosis = new Diagnosis();
+        diagnosis.setSymptoms(symptoms);
+
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> issue = (Map<String, Object>) apiResult.get("Issue");
+
+            diagnosis.setDiagnosisName(getString(issue, "Name"));
+            diagnosis.setIcd(getString(issue, "Icd"));
+            diagnosis.setIcdName(getString(issue, "IcdName"));
+        } catch (Exception e) {
+           // throw new InvalidApiResponseException("Cannot parse ApiMedic diagnosis response", e);
+        }
+
+        diagnosis.setValidationStatus("PENDING");
+        return diagnosis;
+    }
+
+    private static String getString(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        return value != null ? value.toString() : null;
     }
 }

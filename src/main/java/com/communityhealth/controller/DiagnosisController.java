@@ -1,6 +1,8 @@
 
 package com.communityhealth.controller;
 
+import com.communityhealth.dto.DiagnosisRequestDto;
+import com.communityhealth.dto.DiagnosisResponseDto;
 import com.communityhealth.dto.ValidationRequest;
 import com.communityhealth.model.Diagnosis;
 import com.communityhealth.service.DiagnosisService;
@@ -24,9 +26,9 @@ public class DiagnosisController {
      * Perform diagnosis based on symptoms
      */
     @PostMapping
-    public ResponseEntity<List<Diagnosis>> performDiagnosis(
-            @Valid @RequestBody Diagnosis request) {
-        List<Diagnosis> results = diagnosisService.performDiagnosis(request);
+    public ResponseEntity<List<DiagnosisResponseDto>> performDiagnosis(
+            @Valid @RequestBody DiagnosisRequestDto request) {
+        List<DiagnosisResponseDto> results = diagnosisService.performDiagnosis(request);
         return ResponseEntity.ok(results);
     }
 

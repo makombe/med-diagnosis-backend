@@ -14,9 +14,9 @@ spring:
         format_sql: true
 
 apimedic:
-  key: ${APIMEDIC_KEY}
-  secret: ${APIMEDIC_SECRET}
-  base-url: https://healthservice.priaid.ch
+  username: ${APIMEDIC_KEY}
+  password: ${APIMEDIC_SECRET}
+  sandbox: true
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
 
