@@ -1,8 +1,11 @@
 
 package com.communityhealth.controller;
 
+import com.communityhealth.dto.ValidationRequest;
 import com.communityhealth.model.Diagnosis;
 import com.communityhealth.service.DiagnosisService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,24 +14,35 @@ import java.util.List;
 @RequestMapping("/api/diagnosis")
 public class DiagnosisController {
 
-    private final DiagnosisService service;
+    private final DiagnosisService diagnosisService;
 
-    public DiagnosisController(DiagnosisService service) {
-        this.service = service;
+    public DiagnosisController(DiagnosisService diagnosisService) {
+        this.diagnosisService = diagnosisService;
     }
 
+    /**
+     * Perform diagnosis based on symptoms
+     */
     @PostMapping
-    public Diagnosis diagnose(@RequestBody Diagnosis diagnosis) {
-        return service.createDiagnosis(diagnosis);
+    public ResponseEntity<List<Diagnosis>> performDiagnosis(
+            @Valid @RequestBody Diagnosis request) {
+        List<Diagnosis> results = diagnosisService.performDiagnosis(request);
+        return ResponseEntity.ok(results);
     }
 
-    @PostMapping("/{id}/validate")
-    public Diagnosis validate(@PathVariable Long id, @RequestParam boolean valid) {
-        return service.validateDiagnosis(id, valid);
+    /**
+     * Validate a diagnosis result (mark as valid or invalid)
+     */
+    @PostMapping("/validate")
+    public ResponseEntity<Diagnosis> validateDiagnosis(
+            @Valid @RequestBody ValidationRequest request) {
+        Diagnosis result = diagnosisService.validateDiagnosis(request);
+        return ResponseEntity.ok(result);
     }
+
 
     @GetMapping
     public List<Diagnosis> all() {
-        return service.findAll();
+        return diagnosisService.findAll();
     }
 }

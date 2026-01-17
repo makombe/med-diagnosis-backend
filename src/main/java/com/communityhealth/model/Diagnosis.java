@@ -4,6 +4,8 @@ package com.communityhealth.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="diagnosis")
 @Data
@@ -23,7 +25,14 @@ public class Diagnosis {
     private String symptoms;
 
     @Column(length = 2000)
-    private String diagnosisResult;
+    private String diagnosisName;
+    private String icd;
+    private String IcdName;
+    private String validationStatus = "PENDING"; // PENDING, VALID, INVALID
+    private LocalDateTime createdAt;
+    private LocalDateTime validatedAt;
+    private Integer creator;
+    private Integer validatedBy;
 
-    private boolean valid;
+
 }
