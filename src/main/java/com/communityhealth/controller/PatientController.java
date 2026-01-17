@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/patients")
@@ -20,11 +21,15 @@ public class PatientController {
     }
 
     @GetMapping("/search")
-    public List<PatientSearchResponseDto> search(@RequestParam String query) {
+    public List<PatientSearchResponseDto> search(@RequestParam Map<String, String> params) {
+        String searchTerm = params.getOrDefault("query", params.getOrDefault("q", params.get("name")));
+        if (searchTerm == null || searchTerm.isBlank()) {
+            throw new IllegalArgumentException("Search parameter is required");
+        }
 
-        return service.search(query)
+        return service.search(searchTerm)
                 .stream()
-                .map(p -> new PatientSearchResponseDto())
+                .map(p -> new PatientSearchResponseDto(p.getId(), p.getLastName(), p.getFirstName(), p.getGender(), p.getDateOfBirth()))
                 .toList();
     }
 }

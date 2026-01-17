@@ -30,6 +30,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       APIMEDIC_KEY: your_api_key
       APIMEDIC_SECRET: your_secret
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
 
 volumes:
   postgres_data:

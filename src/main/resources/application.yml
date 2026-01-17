@@ -17,4 +17,6 @@ apimedic:
   key: ${APIMEDIC_KEY}
   secret: ${APIMEDIC_SECRET}
   base-url: https://healthservice.priaid.ch
+cors:
+  allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
 
