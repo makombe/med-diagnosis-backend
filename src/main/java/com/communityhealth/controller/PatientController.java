@@ -1,7 +1,5 @@
 package com.communityhealth.controller;
 
-import com.communityhealth.dto.DiagnosisRequestDto;
-import com.communityhealth.dto.DiagnosisResponseDto;
 import com.communityhealth.dto.PatientDto;
 import com.communityhealth.dto.PatientSearchResponseDto;
 import com.communityhealth.service.PatientService;
