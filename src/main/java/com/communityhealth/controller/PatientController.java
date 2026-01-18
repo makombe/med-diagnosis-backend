@@ -1,23 +1,34 @@
 package com.communityhealth.controller;
 
+import com.communityhealth.dto.DiagnosisRequestDto;
+import com.communityhealth.dto.DiagnosisResponseDto;
+import com.communityhealth.dto.PatientDto;
 import com.communityhealth.dto.PatientSearchResponseDto;
 import com.communityhealth.service.PatientService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/patients")
+@RequestMapping("/api/patient")
 public class PatientController {
 
-    private final PatientService service;
+    private final PatientService patientService;
 
-    public PatientController(PatientService service) {
-        this.service = service;
+    public PatientController(PatientService patientService) {
+        this.patientService = patientService;
+    }
+
+    /**
+     * Create patient
+     */
+    @PostMapping
+    public ResponseEntity<PatientDto> create(
+            @Valid @RequestBody PatientDto request) {
+        return ResponseEntity.ok(patientService.create(request));
     }
 
     @GetMapping("/search")
@@ -27,9 +38,10 @@ public class PatientController {
             throw new IllegalArgumentException("Search parameter is required");
         }
 
-        return service.search(searchTerm)
+        return patientService.search(searchTerm)
                 .stream()
                 .map(p -> new PatientSearchResponseDto(p.getId(), p.getLastName(), p.getFirstName(), p.getGender(), p.getDateOfBirth()))
                 .toList();
     }
+    //TODO add end point for updating patient details
 }
